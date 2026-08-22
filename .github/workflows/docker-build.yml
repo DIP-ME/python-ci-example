@@ -1,0 +1,33 @@
+name: Build Docker Image
+
+# Build-only: verifies the Dockerfile builds successfully.
+# No login, no push, no Docker Hub secrets required.
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to build (optional, e.g. 'staging')"
+        required: false
+        default: "local-test"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build image (no push)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          tags: python-ci-example:${{ github.event.inputs.tag }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
