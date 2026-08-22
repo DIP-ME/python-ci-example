@@ -1,0 +1,14 @@
+[project]
+name = "python-ci-example"
+version = "0.1.0"
+requires-python = ">=3.10"
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]  # errors, pyflakes, import sorting
+
+[tool.pytest.ini_options]
+addopts = "-v"
+testpaths = ["tests"]
