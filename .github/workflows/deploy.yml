@@ -1,0 +1,52 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version tag to deploy (e.g. v1.4.0)"
+        required: true
+      environment:
+        description: "Environment to deploy to"
+        required: true
+        type: choice
+        default: "staging"
+        options:
+          - staging
+          - production
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Deploy ${{ inputs.version }} to ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - name: Validate the version looks like a tag
+        run: |
+          if [[ ! "${{ inputs.version }}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::'${{ inputs.version }}' doesn't look like a version tag (expected vX.Y.Z)"
+            exit 1
+          fi
+
+      - name: Check out the exact tag being deployed
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.version }}   # pins the checkout to that tag, not a branch
+
+      - name: Show what would be deployed
+        run: |
+          echo "Version     : ${{ inputs.version }}"
+          echo "Environment : ${{ inputs.environment }}"
+          echo "Commit      : ${{ github.sha }}"
+
+      - name: "Pretend: pull image for this version"
+        run: echo "🐳 docker pull yourrepo/python-ci-example:${{ inputs.version }}"
+
+      - name: "Pretend: deploy"
+        run: echo "🚀 Deploying ${{ inputs.version }} to ${{ inputs.environment }}... done!"
+
+      - name: "Pretend: smoke test"
+        run: echo "✅ curl https://${{ inputs.environment }}.example.com/health -> 200 OK"
